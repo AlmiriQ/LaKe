@@ -1,8 +1,22 @@
-import sys, os
+import sys, os, glob
 
 
 class Terminal:
 	def __init__(self):
+		def getAllFileNames(root):
+			for fn in glob.iglob(root + "*", recursive=True):
+				if not (fn.startswith("/") or fn.startswith("./") or fn.startswith("~")):
+					fn = "./" + fn
+				if "/." in fn:
+					continue
+				if os.path.isdir(fn) and not fn.endswith("/"):
+					fn += "/"
+				if os.path.isdir(fn):
+					for eve in getAllFileNames(fn):
+						yield eve
+				else:
+					yield fn
+
 		def writeFileData(file, data):
 			f = open(file, "w")
 			f.write(data)
@@ -27,6 +41,7 @@ class Terminal:
 			"write": writeFileData,
 			"read": readFileData,
 			"append": appendFileData,
+			"scan": getAllFileNames,
 			"lua": lambda code: os.system('lua -e "' + code.replace("\"", "\\\"") + '"')
 		}
 
