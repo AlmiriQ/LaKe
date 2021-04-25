@@ -2,9 +2,9 @@
 LaKe build system (make for lain => lain + make = lake)
 
 # Usage
-Create a "lakefile" in project directory
-Fill it with python code
-Run "lake" command in terminal
++ Create a "lakefile" in project directory
++ Fill it with python code
++ Run "lake" command in terminal
 
 # Install (Linux)
 Option 1: Run "make" and lake will be installed
