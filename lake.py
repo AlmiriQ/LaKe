@@ -3,6 +3,7 @@ import sys, os, glob, itertools
 
 class Terminal:
 	def __init__(self):
+		# directory scan function
 		def getAllFileNames(root):
 			for fn in glob.iglob(root + "*", recursive=True):
 				if not (fn.startswith("/") or fn.startswith("./") or fn.startswith("~")):
@@ -16,57 +17,49 @@ class Terminal:
 						yield eve
 				else:
 					yield fn
-
+		# get only file extension
 		def onlyExtension(files, ext):
-			if type(ext) == str:
-				ext = { ext }
-			else:
-				ext = set(ext)
+			ext = ext = { ext } if type(ext) == str else ext = set(ext)
 			for file in files:
 				if file.split(".")[-1] in ext:
 					yield file
-
+		# write string data to file
 		def writeFileData(file, data):
-			f = open(file, "w")
-			f.write(data)
-			f.close()
-		
+			with open(file, "w") as f:
+				f.write(data)
+		# read string data from file
 		def readFileData(file):
-			f = open(file, "r")
-			result = f.read()
-			f.close()
-			return result
-		
+			with open(file, "r") as f:
+				return f.read()
+		# append string data to file
 		def appendFileData(file, data):
-			f = open(file, "a")
-			f.write(data)
-			f.close()
-
+			with open(file, "a") as f:
+				f.write(data)
+		# run C code in string
 		def runCCode(code):
-			f = open("code.c", "w")
-			f.write(code)
-			f.close()
-			os.system("gcc code.c -o code.o")
-			os.system("./code.o")
-			os.system("rm code.c code.o")
-
+			with open("code.c", "w") as f:
+				f.write(code)
+			os.system("gcc code.c -o code.o && ./code.o && rm code.c code.o")
+		# pushing functional to lakefile env
 		self.globals = {
+			# gcc compilation
 			"fcompile": lambda what, output, *flags: os.system(f"gcc {what} -o {output} {' '.join(list(flags))}"),
 			"lcompile": lambda what, output, *flags: os.system(f"gcc {what} -c -o {output}.o {' '.join(list(flags))}") and os.system(f"ar rsc {output}.a {output}.o") and os.system(f"rm {output}.o"),
 			"compile": lambda what, output, *flags: os.system(f"gcc {what} -o {output} {' '.join(list(flags))}"),
+			# clear
 			"clear": lambda: os.system("clear"),
+			# join iterators
 			"chained": itertools.chain,
-			"run": os.system,
-			"bash": os.system,
+			# run commands
+			"run": os.system, "bash": os.system, 
 			"c": runCCode,
-			"write": writeFileData,
-			"read": readFileData,
-			"append": appendFileData,
-			"scan": getAllFileNames,
-			"onlyExtension": onlyExtension,
+			# file functions
+			"write": writeFileData, "read": readFileData, "append": appendFileData, 
+			"scan": getAllFileNames, "onlyExtension": onlyExtension,
+			# run lua code
 			"lua": lambda code: os.system('lua -e "' + code.replace("\"", "\\\"") + '"')
 		}
-
+	
 	def exeqt(self, data, *args):
 		data = data.replace(" then ", " ; ")
 		exec(data, self.globals)
@@ -88,9 +81,9 @@ class Terminal:
 					sys.exit(3)
 
 
+# running lakefile
 def main():
-	sys.argv = sys.argv[1:]
-	data = ""
+	sys.argv, data = sys.argv[1:], ""
 	try:
 		lf = open("lakefile")
 		data = lf.read()
