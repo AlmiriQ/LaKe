@@ -19,7 +19,7 @@ class Terminal:
 					yield fn
 		# get only file extension
 		def onlyExtension(files, ext):
-			ext = ext = { ext } if type(ext) == str else ext = set(ext)
+			ext = (({ ext }) if type(ext) == str else (set(ext)))
 			for file in files:
 				if file.split(".")[-1] in ext:
 					yield file
